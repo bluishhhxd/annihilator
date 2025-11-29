@@ -1,2 +1,2 @@
 # annihilator
-A project I will be working on that can delete duplicate files from your system
+A project I worked on that can delete duplicate files from your system
