@@ -28,7 +28,7 @@ def print_BLUE(text):
     print_message(text, Fore.BLUE)
 
 HASH_CHUNK_SIZE_BYTES = 65536
-PREFIX_HASH_BYTES = 4 * 1024 * 1024  # 4MB prefix for quick candidate grouping
+PREFIX_HASH_BYTES = 4 * 1024 * 1024  
 
 def _safe_getsize(file_path):
     try:
@@ -58,16 +58,12 @@ def compute_hash(file_path, *, max_bytes=None):
 
 
 def find_duplicate_files(directory_to_scan):
-    skipped = []  # list[tuple[path, error_str]]
-
-    # First pass: group files by size (cheap) so we only hash plausible duplicates.
+    skipped = []  
     files_by_size = defaultdict(list)
     for root, dirs, files in os.walk(directory_to_scan, followlinks=False):
-        # Avoid scanning symlinked dirs/junctions where it can create loops.
         try:
             dirs[:] = [d for d in dirs if not os.path.islink(os.path.join(root, d))]
         except OSError:
-            # If we can't inspect links here, keep default behavior but continue.
             pass
 
         for filename in files:
@@ -86,7 +82,6 @@ def find_duplicate_files(directory_to_scan):
     if not candidate_paths:
         return [], skipped
 
-    # Second pass: quick prefix-hash for candidate grouping (then full hash confirm).
     prefix_groups = defaultdict(list)
     for file_path in candidate_paths:
         try:
@@ -114,7 +109,7 @@ def find_duplicate_files(directory_to_scan):
 
 def delete_duplicates(duplicate_files):
     deleted = []
-    failed = []  # list[tuple[path, error_str]]
+    failed = []
 
     for files in duplicate_files:
         if not files:
